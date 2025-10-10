@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.approval.project.repository.ApprovalMapper">
+
+<resultMap id="joinTable" type="com.approval.project.model.ResDetailDTO">
+        <result property="num" column="num"/>
+        <result property="writerId" column="writer_id"/>
+        <result property="writerName" column="writer_name"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+        <result property="regDate" column="reg_date"/>
+        <result property="apprDate" column="appr_date"/>
+        <result property="approverId" column="approver_id"/>
+        <result property="apprName" column="approver_name"/>
+        <result property="apprPosition" column="approver_position"/>
+		<result property="levelNo" column="level_no"/>
+        <result property="statusCode" column="status_code"/>
+        <result property="statusName" column="status_name"/>
+    </resultMap>
+
+	<sql id="join_list_table">
+		SELECT 
+			al.num,
+			al.writer_id,
+			we.emp_name       AS writer_name,
+			al.title,
+			al.content,
+			al.reg_date,
+			al.appr_date,
+			al.approver_id,
+			ae.emp_name       AS approver_name,
+			p.position_name   AS approver_position,
+			p.level_no		  AS level_no,
+			al.status_code,
+			s.status_name
+		FROM approval_list as al
+		LEFT JOIN approval_emp as we ON al.writer_id = we.user_id
+		LEFT JOIN approval_emp as ae ON al.approver_id = ae.user_id
+		LEFT JOIN positions as p ON ae.position_cd = p.position_cd
+		LEFT JOIN approval_status as s ON al.status_code = s.status_code
+	ORDER BY al.num ASC
+	</sql>
+
+	<sql id="if_position">
+		<if test="positionCd == 'pm'">
+			or sub.status_code in ("APR", "CMP")
+			or sub.num in (
+				select approval_num
+				from approval_history
+				where status_code="REJ" and position_cd="pm"
+				group by approval_num
+			)
+		</if>
+		<if test="positionCd == 'pl'">
+			 or status_code = "PND"
+			 or sub.num in (
+				select approval_num   
+				from (
+					select approval_num, row_number() over(partition by approval_num order by his_reg_date desc) as rnk
+					from approval_history
+					where status_code in ("REJ", "CMP", "APR") and proc_id=#{userId}
+					) t
+				where t.rnk = 1
+			 )
+		</if>
+	</sql>
+
+	<!-- 결재목록 (페이징 완료) -->
+	<select id="findAll" parameterType="com.approval.project.model.PageDTO" resultMap="joinTable">
+		select 
+	        sub.num,
+	        sub.writer_id,
+	        sub.writer_name,
+	        sub.title,
+	        sub.content,
+	        sub.reg_date,
+	        sub.appr_date,
+	        sub.approver_id,
+	        sub.approver_name,
+	        sub.approver_position,
+	        sub.level_no,
+	        sub.status_code,
+	        sub.status_name
+		from (<include refid="join_list_table"/>) as sub
+		where writer_id = #{userId}
+		<include refid="if_position" />
+		order by sub.reg_date desc
+		limit #{pageSize} offset #{offset}
+	</select>
+	
+	<select id="findAllCnt" resultType="int">
+		select count(num) 
+		from approval_list
+	</select>
+	
+	<!-- 조건 넣은 리스트 총 갯수 구하기 --> 
+	<select id="findCnt" parameterType="com.approval.project.model.PageDTO" resultType="int">
+		select count(sub.num)
+		from (<include refid="join_list_table"/>) as sub
+		where 1=1
+		<if test="userId != null">and writer_id = #{userId}</if>
+		<include refid="if_position"/>
+	</select>
+	
+
+	<!-- 로그인 -->
+	<select id="tryLogin" parameterType="map" resultType="map">
+		select emp_no
+			, user_id
+			, emp_name
+			, e.position_cd
+			, position_name
+		from approval_emp as e
+			LEFT JOIN positions as p ON e.position_cd = p.position_cd
+		where user_id = #{userId} and user_pw = #{userPw}
+	</select>
+
+	
+	<!-- 상세보기 -->
+	<select id="findDetail" parameterType="int" resultType="com.approval.project.model.ResDetailDTO">
+		select num 			as num
+			, writer_id		as writerId
+			, title			as title
+			, content		as content
+			, reg_date		as regDate
+			, appr_date		as apprDate
+			, approver_id	as approverId
+			, status_code	as statusCode
+			, emp_name 		as writerName
+		from approval_list as L
+			left join approval_emp as E on L.writer_id = E.user_id
+		where num = #{num}
+	</select>
+	 
+	<insert id="create" parameterType="com.approval.project.model.ListDTO" keyProperty="num" useGeneratedKeys="true">
+		insert into approval_list (
+			writer_id 		
+			, title			
+			, content		
+			, reg_date 	
+			<if test="statusCode == 'PND'">, appr_date</if>
+			<if test="statusCode == 'PND'">, approver_id</if>
+			, status_code	
+		) values (
+			#{writerId}
+			, #{title}
+			, #{content}
+			, now()
+			<if test="statusCode == 'PND'">, now()</if>
+			<if test="statusCode == 'PND'">, #{writerId}</if>
+			, #{statusCode} 
+		)
+	</insert>
+	
+	
+	<insert id="addhisroty" parameterType="com.approval.project.model.HistoryDTO" keyProperty="hisNum" useGeneratedKeys="true">
+		insert into approval_history (
+			approval_num
+			, proc_id
+			, position_cd
+			, status_code
+			, his_reg_date
+		) values (
+			#{approvalNum}
+			, #{procId}
+			, #{positionCd}
+			, #{statusCode}
+			, now()
+		)
+	</insert>
+	
+	<update id="updateList" parameterType="com.approval.project.model.ListDTO">
+	 	update approval_list
+	 	set status_code = #{statusCode} 	
+	 		, appr_date = now() 
+	 		, approver_id = #{approverId}
+	 		<if test="statusCode != 'TMP' or statusCode != 'REJ'">
+	 		, title = #{title}
+	 		, content = #{content}
+	 		</if>
+	 	where num = #{num}
+	</update>
+	
+	
+	<select id="findHitsory" parameterType="int" resultType="com.approval.project.model.HistoryDTO">
+		select his_num 		as hisNum
+			, approval_num	as approvalNum
+		    , emp_name  	as  procId
+		    , position_name	as positionCd
+			, status_name	as statusCode
+			, his_reg_date	as hisRegDate
+		from approval_history as H
+			left join approval_emp as E on H.proc_id = E.user_id
+		    left join positions as P on E.position_cd = P.position_cd
+		    left join approval_status as S on H.status_code = S.status_code
+		where approval_num = #{docNum}
+	</select>
+
+</mapper>
