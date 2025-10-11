@@ -9,12 +9,19 @@ import {
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState({});
-  const [isLogin, setIsLogin] = useState(false);
+  const [user, setUser] = useState(() => {
+    const savedUser = sessionStorage.getItem("user");
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
+
+  const [isLogin, setIsLogin] = useState(() => {
+    return sessionStorage.getItem("user") ? true : false;
+  });
 
   const login = useCallback(async (inputId, inputPw) => {
-    // DB에서 아이디, 로그인 일치 확인
     try {
+      sessionStorage.clear();
+
       const res = await fetch("http://localhost:8080/approval", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -25,9 +32,6 @@ export function AuthProvider({ children }) {
       });
       const data = await res.json();
 
-      //   console.log("서버통신 결과", data.success);
-      //   console.log("DB조회 결과1", data.userInfo);
-
       if (!data.success) {
         alert(`일치하는 회원정보를 찾을 수 없습니다.`);
         return;
@@ -35,6 +39,8 @@ export function AuthProvider({ children }) {
 
       setUser(data.userInfo);
       setIsLogin(true);
+
+      sessionStorage.setItem("user", JSON.stringify(data.userInfo));
 
       return { success: true };
     } catch (error) {
@@ -45,6 +51,8 @@ export function AuthProvider({ children }) {
   const logout = useCallback(() => {
     setUser(null);
     setIsLogin(false);
+
+    sessionStorage.clear();
   });
 
   const value = useMemo(
