@@ -30,29 +30,6 @@ public class ApprovalController {
 		this.service = approvalService;
 	}
 	
-	// 이 메소드는 쓰지 않게됨
-	@GetMapping("/list")
-	public ResponseDTO findAll() {	
-		
-		PageDTO pageDTO = new PageDTO();
-		
-		// 페이징을 위한 초기값 세팅
-		pageDTO.setCurPage(1);
-		pageDTO.setPageSize(5);
-		pageDTO.setOffset(0);
-		
-		// item 받아오는 배열
-		List<ResDetailDTO> list = service.findAll(pageDTO);
-		
-		// 페이징
-		PageDTO resPageDTO = service.page(pageDTO);
-		
-		ResponseDTO resDTO = new ResponseDTO();
-		resDTO.setList(list);
-		resDTO.setPage(resPageDTO);
-		
-		return resDTO;
-	}
 	
 	@PostMapping("/page")
 	public ResponseDTO movePage(@RequestBody PageDTO pageDTO) {

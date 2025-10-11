@@ -57,11 +57,11 @@
 			 or sub.num in (
 				select approval_num   
 				from (
-					select approval_num, row_number() over(partition by approval_num order by his_reg_date desc) as rnk
+					select *, row_number() over(partition by approval_num order by his_reg_date desc) as rnk
 					from approval_history
-					where status_code in ("REJ", "CMP", "APR") and proc_id=#{userId}
+					where status_code in ("REJ", "CMP", "APR") and position_cd=#{positionCd}
 					) t
-				where t.rnk = 1
+				where t.rnk = 1 and t.proc_id=#{userId}
 			 )
 		</if>
 	</sql>
