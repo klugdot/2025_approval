@@ -118,7 +118,7 @@ export default function BasicInfo({ detailAppr }) {
 
   const createList = async (formData) => {
     try {
-      const res = await fetch("http://localhost:8080/approval/create", {
+      const res = await fetch(`${baseUrl}/approval/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -137,7 +137,7 @@ export default function BasicInfo({ detailAppr }) {
 
   const updateList = async (formData) => {
     try {
-      const res = await fetch("http://localhost:8080/approval/update", {
+      const res = await fetch(`${baseUrl}approval/update`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -156,7 +156,7 @@ export default function BasicInfo({ detailAppr }) {
 
   const addHisroty = async (formData) => {
     try {
-      const res = await fetch("http://localhost:8080/approval/addhistory", {
+      const res = await fetch(`${baseUrl}/approval/addhistory`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
