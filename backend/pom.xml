@@ -14,7 +14,7 @@
   <groupId>com.example</groupId>
   <artifactId>firstproject</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <packaging>war</packaging>
+  <packaging>jar</packaging> <!-- war -->
   <name>firstproject</name>
   <description>Demo project for Spring Boot with JSP</description>
 
@@ -58,7 +58,7 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-tomcat</artifactId>
-      <scope>provided</scope>
+      <!-- <scope>provided</scope> -->
     </dependency>
 
     <!-- 개발 중 자동 리로딩용 -->
