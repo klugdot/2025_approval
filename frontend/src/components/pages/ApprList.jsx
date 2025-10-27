@@ -6,6 +6,7 @@ export default function ApprList() {
   const { user } = useAuth();
   const [apprList, setApprList] = useState([]);
   const navigate = useNavigate();
+  const baseUrl = import.meta.env.VITE_API_URL;
 
   const [page, setPage] = useState({});
   const [pageBlock, setPageBlock] = useState([]);

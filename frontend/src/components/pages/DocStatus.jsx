@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 export default function DocStatus({ docNum }) {
+  const baseUrl = import.meta.env.VITE_API_URL;
   //   console.log(docNum);
   const [history, setHistory] = useState([]);
 

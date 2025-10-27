@@ -9,6 +9,8 @@ import {
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
+  const baseUrl = import.meta.env.VITE_API_URL;
+
   const [user, setUser] = useState(() => {
     const savedUser = sessionStorage.getItem("user");
     return savedUser ? JSON.parse(savedUser) : null;

@@ -5,6 +5,7 @@ import { useAuth } from "../login/AuthContext";
 export default function BasicInfo({ detailAppr }) {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const baseUrl = import.meta.env.VITE_API_URL;
 
   const [totalCnt, setTotalCnt] = useState();
   const docsNum = detailAppr ? detailAppr.num : totalCnt + 1;
