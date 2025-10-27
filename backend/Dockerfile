@@ -15,6 +15,9 @@
 # COPY --from=build /app/target/*.jar app.jar
 # EXPOSE 8080
 
-FROM openjdk:17-jdk-slim
-COPY ./target/firstproject-0.0.1-SNAPSHOT.jar /app/app.jar
+
+FROM eclipse-temurin:17-jdk
+WORKDIR /app
+COPY target/firstproject-0.0.1-SNAPSHOT.jar app.jar
+EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]
