@@ -10,9 +10,7 @@ export default function DocStatus({ docNum }) {
       return;
     }
     const detail = async () => {
-      const res = await fetch(
-        `http://localhost:8080/approval/history/${docNum}`
-      );
+      const res = await fetch(`${baseUrl}/approval/history/${docNum}`);
       const data = await res.json();
       setHistory(data);
     };

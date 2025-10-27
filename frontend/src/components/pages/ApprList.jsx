@@ -31,7 +31,7 @@ export default function ApprList() {
     };
     // console.log("formData", formData);
 
-    const res = await fetch("http://localhost:8080/approval/page", {
+    const res = await fetch(`${baseUrl}/approval/page`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(formData),

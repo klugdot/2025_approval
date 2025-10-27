@@ -16,7 +16,7 @@ export default function BasicInfo({ detailAppr }) {
 
   useEffect(() => {
     const readList = async () => {
-      const res = await fetch("http://localhost:8080/approval/findCount");
+      const res = await fetch(`${baseUrl}/approval/findCount`);
       const data = await res.json();
       setTotalCnt(data.count);
     };

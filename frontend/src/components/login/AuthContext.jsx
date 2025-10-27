@@ -22,7 +22,7 @@ export function AuthProvider({ children }) {
     try {
       sessionStorage.clear();
 
-      const res = await fetch("http://localhost:8080/approval", {
+      const res = await fetch(`${baseUrl}/approval`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

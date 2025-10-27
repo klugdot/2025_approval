@@ -8,11 +8,12 @@ export default function ApprDetail() {
   const { num } = useParams();
   const [detailAppr, setDetailAppr] = useState({});
   console.log("상세보기");
+  const baseUrl = import.meta.env.VITE_API_URL;
 
   // 상세보기 - 작성자 이름 같이 받아와야 함
   useEffect(() => {
     const detail = async () => {
-      const res = await fetch(`http://localhost:8080/approval/${num}`);
+      const res = await fetch(`${baseUrl}/approval/${num}`);
       const data = await res.json();
       setDetailAppr(data);
     };
